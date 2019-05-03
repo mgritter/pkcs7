@@ -176,6 +176,10 @@ func readObject(ber []byte, offset int) (asn1Object, int, error) {
 	offset++
 	indefinite := false
 	if l > 0x80 {
+		if offset >= len(ber) {
+			return nil, 0, errors.New("ber2der: read off end of input")
+		}
+
 		numberOfBytes := (int)(l & 0x7F)
 		if numberOfBytes > 4 { // int is only guaranteed to be 32bit
 			return nil, 0, errors.New("ber2der: BER tag length too long")
