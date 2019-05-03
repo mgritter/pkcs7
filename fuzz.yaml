@@ -1,0 +1,11 @@
+base: ubuntu:16.04
+setup:
+language: go
+version: "1.12"
+checkout: github.com/fullsailor/pkcs7
+targets:
+  - name: ber2der
+    corpus: bercorpus/
+    harness:
+      function: BerFuzzer
+      package: github.com/fullsailor/pkcs7/
