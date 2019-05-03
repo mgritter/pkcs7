@@ -8,4 +8,4 @@ targets:
     corpus: bercorpus/
     harness:
       function: BerFuzzer
-      package: github.com/fullsailor/pkcs7/
+      package: github.com/fullsailor/pkcs7
