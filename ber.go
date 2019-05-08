@@ -136,7 +136,7 @@ func readObject(ber []byte, offset int) (asn1Object, int, error) {
 	//fmt.Printf("\n====> Starting readObject at offset: %d\n\n", offset)
 	tagStart := offset
 	if offset >= len(ber) {
-		return nil, 0, errors.New("ber2der: read off end of input")
+		return nil, 0, errors.New("ber2der: not enough bytes to read tag")
 	}
 	b := ber[offset]
 	offset++
@@ -145,13 +145,13 @@ func readObject(ber []byte, offset int) (asn1Object, int, error) {
 	if tag == 0x1F {
 		tag = 0
 		if offset >= len(ber) {
-			return nil, 0, errors.New("ber2der: read off end of input")
+			return nil, 0, errors.New("ber2der: not enough bytes to read tag")
 		}
 		for ber[offset] >= 0x80 {
 			tag = tag*128 + ber[offset] - 0x80
 			offset++
 			if offset >= len(ber) {
-				return nil, 0, errors.New("ber2der: read off end of input")
+				return nil, 0, errors.New("ber2der: not enough bytes to read tag")
 			}
 		}
 		tag = tag*128 + ber[offset] - 0x80
@@ -170,14 +170,14 @@ func readObject(ber []byte, offset int) (asn1Object, int, error) {
 	// read length
 	var length int
 	if offset >= len(ber) {
-		return nil, 0, errors.New("ber2der: read off end of input")
+		return nil, 0, errors.New("ber2der: not enough bytes to read length")
 	}
 	l := ber[offset]
 	offset++
 	indefinite := false
 	if l > 0x80 {
 		if offset >= len(ber) {
-			return nil, 0, errors.New("ber2der: read off end of input")
+			return nil, 0, errors.New("ber2der: not enough bytes to read length")
 		}
 
 		numberOfBytes := (int)(l & 0x7F)
@@ -190,12 +190,12 @@ func readObject(ber []byte, offset int) (asn1Object, int, error) {
 		if 0x0 == (int)(ber[offset]) {
 			return nil, 0, errors.New("ber2der: BER tag length has leading zero")
 		}
+		if offset+numberOfBytes > len(ber) {
+			return nil, 0, errors.New("ber2der: not enough bytes to read length")
+		}
 		//fmt.Printf("--> (compute length) indicator byte: %x\n", l)
 		//fmt.Printf("--> (compute length) length bytes: % X\n", ber[offset:offset+numberOfBytes])
 		for i := 0; i < numberOfBytes; i++ {
-			if offset >= len(ber) {
-				return nil, 0, errors.New("ber2der: read off end of input")
-			}
 			length = length*256 + (int)(ber[offset])
 			offset++
 		}
